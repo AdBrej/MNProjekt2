@@ -363,36 +363,38 @@ Result Gaussa(Matrix &A, Matrix &B){
 //    createDiagonalNxN(I);
     int iteration = 0;
     Matrix tmp = copyMatrix(A);
+    int sizeRow = tmp.sizeRow;
+    int sizeCol = tmp.sizeCol;
     double a, b; // współczynniki przy macierzach sprawdzone przed zmianamina wierszu
-    for (int row = 0; row < tmp.sizeRow; ++row) {
+    for (int row = 0; row < sizeRow; ++row) {
         a = tmp.Matrix[row][row];
         iteration +=1;
         std::cout << iteration <<"\n";
-        for (int col = 0; col < tmp.sizeCol; ++col) {
+        for (int col = row; col < sizeCol; ++col) {
             if(a== 0){
                 break;
             }else{
-                double tmp1 = tmp.Matrix[row][col] / a;
-                tmp.Matrix[row][col] = tmp1;
-//                double tmp2 = I.Matrix[row][col] / a;
-//                I.Matrix[row][col] = tmp2;
+                //double tmp1 = tmp.Matrix[row][col] / a;
+                tmp.Matrix[row][col] /= a;
+
             }
         }
         if(a != 0){
-            double tmp2 = I.Matrix[row][0] / a;
-            I.Matrix[row][0] = tmp2;
+            //double tmp2 = I.Matrix[row][0] / a;
+            I.Matrix[row][0] /= a;
         }
-        for (int row2 = 0; row2 < tmp.sizeRow; ++row2) {
+        for (int row2 = 0; row2 < sizeRow; ++row2) {
             if(row2 != row){
                 b = tmp.Matrix[row2][row];
-                for (int col = 0; col < tmp.sizeCol; ++col) {
-                    double tmp1 = tmp.Matrix[row2][col] - (tmp.Matrix[row][col] * b);
-                    tmp.Matrix[row2][col] = tmp1;
+
+                for (int col = row; col < sizeCol ; ++col) {
+                    //double tmp1 = tmp.Matrix[row2][col] - (tmp.Matrix[row][col] * b);
+                    tmp.Matrix[row2][col] -= (tmp.Matrix[row][col] * b);
 //                    double tmp2 = I.Matrix[row2][0] - (I.Matrix[row][0] * b);
 //                    I.Matrix[row2][0] = tmp2;
                 }
-                double tmp2 = I.Matrix[row2][0] - (I.Matrix[row][0] * b);
-                I.Matrix[row2][0] = tmp2;
+                //double tmp2 = I.Matrix[row2][0] - (I.Matrix[row][0] * b);
+                I.Matrix[row2][0] -= (I.Matrix[row][0] * b);
             }
         }
     }
@@ -544,18 +546,18 @@ int main() {
     std::cout << ms;
 */
 
-    Result R = Jacobi(A, b, mConst::eps);
-    std::cout<<"----------------------------------------------------" <<std::endl;
-    std::cout<<R.iteration<<"\n"<<R.duration<<"\n";
-    displayMatrix(R.M);
+//    Result R = Jacobi(A, b, mConst::eps);
+//    std::cout<<"----------------------------------------------------" <<std::endl;
+//    std::cout<<R.iteration<<"\n"<<R.duration<<"\n";
+//    displayMatrix(R.M);
     Result R2 = GaussS(A, b, mConst::eps);
     std::cout<<"----------------------------------------------------" <<std::endl;
     std::cout << R2.iteration << "\n" << R2.duration << "\n";
     displayMatrix(R2.M);
-    Result R3 = Gaussa(A, b);
-    std::cout<<"----------------------------------------------------" <<std::endl;
-    std::cout << R3.iteration << "\n" << R3.duration << "\n";
-    displayMatrix(R3.M);
+//    Result R3 = Gaussa(A, b);
+//    std::cout<<"----------------------------------------------------" <<std::endl;
+//    std::cout << R3.iteration << "\n" << R3.duration << "\n";
+//    displayMatrix(R3.M);
 //    ----------KONIEC TESTÓW--------------------Matrix AA = createMatrix(4, 4);
     Matrix BB = createMatrix(4, 1);
     BB.Matrix[0][0] = 13.15;

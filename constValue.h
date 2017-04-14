@@ -12,7 +12,7 @@ namespace mConst {
     const int f = 3;
     const int DODAWANIE = 1;
     const int ODEJMOWANIE = -1;
-    const int tmpsize = 5;
+    const int tmpsize = 1000;
     const int eps = 1e-9;
 
 }
