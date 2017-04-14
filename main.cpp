@@ -194,20 +194,21 @@ Matrix inverseMatrix(Matrix &A){
             if(a== 0){
                 break;
             }else{
-                double tmp1 = tmp.Matrix[row][col] / a;
-                tmp.Matrix[row][col] = tmp1;
-                double tmp2 = I.Matrix[row][col] / a;
-                I.Matrix[row][col] = tmp2;
+//                double tmp1 = tmp.Matrix[row][col] / a;
+                tmp.Matrix[row][col] /= a;
+//                double tmp2 = I.Matrix[row][col] / a;
+                I.Matrix[row][col] /= a;
             }
         }
         for (int row2 = 0; row2 < sizeRow; ++row2) {
             if(row2 != row){
                 b = tmp.Matrix[row2][row];
                 for (int col = 0; col < sizeCol; ++col) {
-                    double tmp1 = tmp.Matrix[row2][col] - (tmp.Matrix[row][col] * b);
-                    tmp.Matrix[row2][col] = tmp1;
-                    double tmp2 = I.Matrix[row2][col] - (I.Matrix[row][col] * b);
-                    I.Matrix[row2][col] = tmp2;
+                    std::cout << row << " | " << row2 << std::endl;
+//                    double tmp1 = tmp.Matrix[row2][col] - (tmp.Matrix[row][col] * b);
+                    tmp.Matrix[row2][col] -= (tmp.Matrix[row][col] * b);
+//                    double tmp2 = I.Matrix[row2][col] - (I.Matrix[row][col] * b);
+                    I.Matrix[row2][col] -= (I.Matrix[row][col] * b);
                 }
             }
         }
@@ -221,13 +222,13 @@ Matrix multiplyMatrix(Matrix &M, Matrix &X){
     int MsizeCol = M.sizeCol;
     int XsizeRow = X.sizeRow;
     int XsizeCol = X.sizeCol;
+    double sum;
     Matrix out = createMatrix(XsizeRow, XsizeCol);
     for (int rowM = 0; rowM < MsizeRow; ++rowM) {
         for (int colX = 0; colX < XsizeCol; ++colX) {
-            double sum = 0;
+            sum = 0;
             for (int i = 0; i < MsizeCol; ++i) {
-                double tmp = M.Matrix[rowM][i] * X.Matrix[i][colX];
-                sum += tmp;
+                sum += M.Matrix[rowM][i] * X.Matrix[i][colX];
             }
             out.Matrix[rowM][colX] = sum;
         }
@@ -278,10 +279,18 @@ Result GaussS(Matrix &A, Matrix &b, double eps){
     Matrix U = UMatrix(A);
 //    Matrix DL = addMatrixNxN(D, L, -1);
     Matrix DL = addMatrixNxN(D, L, mConst::ODEJMOWANIE);
-
+    long long ms3 = std::chrono::duration_cast< std::chrono::milliseconds >(
+            std::chrono::system_clock::now().time_since_epoch()).count();
+    long long dms1ms3 = ms3-ms;
     Matrix iDL = inverseMatrix(DL);
+    long long ms4 = std::chrono::duration_cast< std::chrono::milliseconds >(
+            std::chrono::system_clock::now().time_since_epoch()).count();
+    long long dms3ms4 = ms4-ms3;
     Matrix T = multiplyMatrix(iDL, U);
     Matrix F = multiplyMatrix(iDL, b);
+    long long ms5 = std::chrono::duration_cast< std::chrono::milliseconds >(
+            std::chrono::system_clock::now().time_since_epoch()).count();
+    long long dms4ms5 = ms5-ms4;
 //    displayMatrix(A);
 //    displayMatrix(b);
 //    displayMatrix(D);
@@ -325,8 +334,14 @@ Result Jacobi(Matrix &A, Matrix &b, double eps) {
     Matrix D = DMatrix(A);
     Matrix L = LMatrix(A);
     Matrix U = UMatrix(A);
+    long long ms3 = std::chrono::duration_cast< std::chrono::milliseconds >(
+            std::chrono::system_clock::now().time_since_epoch()).count();
+    long long dms1ms3 = ms3-ms;
     Matrix LU = addMatrixNxN(L, U);
     Matrix iD = inverseMatrix(D);
+    long long ms4 = std::chrono::duration_cast< std::chrono::milliseconds >(
+            std::chrono::system_clock::now().time_since_epoch()).count();
+    long long dms4ms3 = ms4-ms3;
     Matrix T = multiplyMatrix(iD, LU);
     Matrix F = multiplyMatrix(iD, b);
 
@@ -336,6 +351,7 @@ Result Jacobi(Matrix &A, Matrix &b, double eps) {
     double nor;
 
     do {
+
         TX = multiplyMatrix(T, Xin);
         Xout = addMatrixNxN(TX, F);
 //        XoutXin = addMatrixNxN(Xout, Xin, -1);
@@ -343,7 +359,8 @@ Result Jacobi(Matrix &A, Matrix &b, double eps) {
         iterationCount += 1;
         Xin = Xout;
         nor = norm(XoutXin);
-    } while (eps < nor);
+//        std::cout << iterationCount<< " | "<< nor <<"\n";
+    } while (eps < nor && iterationCount < 1000);
     long long ms2 = std::chrono::duration_cast< std::chrono::milliseconds >(
             std::chrono::system_clock::now().time_since_epoch()).count();
     Result result;
@@ -546,10 +563,10 @@ int main() {
     std::cout << ms;
 */
 
-//    Result R = Jacobi(A, b, mConst::eps);
+    Result R = Jacobi(A, b, mConst::eps);
 //    std::cout<<"----------------------------------------------------" <<std::endl;
-//    std::cout<<R.iteration<<"\n"<<R.duration<<"\n";
-//    displayMatrix(R.M);
+    std::cout<<R.iteration<<"\n"<<R.duration<<"\n";
+    displayMatrix(R.M);
     Result R2 = GaussS(A, b, mConst::eps);
     std::cout<<"----------------------------------------------------" <<std::endl;
     std::cout << R2.iteration << "\n" << R2.duration << "\n";
