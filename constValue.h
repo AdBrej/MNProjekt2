@@ -7,13 +7,13 @@
 namespace mConst {
     const int c = 3;
     const int d = 7;
-    const int N = 9 * c * d;
+    const int N = 9 * 100 + 10 * c + 1 * d;
     const int e = 0;
     const int f = 3;
     const int DODAWANIE = 1;
     const int ODEJMOWANIE = -1;
-    const int tmpsize = 3000;
-    const int eps = 1e-9;
+    const int tmpsize = 2000;
+    const double eps = 1e-9;
 
 }
 

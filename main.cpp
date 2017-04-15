@@ -216,6 +216,48 @@ Matrix inverseMatrix(Matrix &A){
 
     return I;
 }
+void jordan(double **tablica, double **pom, int n)									//obliczanie macierzy odwrotej metoda jordana
+{
+    int i, j, g;
+    for (i = 0; i<n; i++)
+    {									//tablica pomocnicza z 1 na przekatnej
+        for (j = 0; j<n; j++)
+        {
+            if (i == j)
+            {
+                pom[i][j] = 1;
+            }
+            else
+                pom[i][j] = 0;
+        }
+    }
+    for (i = 0; i<n; i++)
+    {
+        for (j = 0; j <= i; j++)
+        {
+            pom[i][j] /= tablica[i][i];
+        }
+        for (g = i + 1; g<n; g++)
+        {
+            for (j = 0; j <= g; j++)
+            {
+                pom[g][j] -= (pom[i][j] * tablica[g][i]);
+            }
+        }
+    }
+}
+Matrix inverseMatrixTT(Matrix &A){
+    int sizeRow = A.sizeRow;
+    int sizeCol = A.sizeCol;
+    Matrix I = createMatrix(sizeRow, sizeCol);
+    createDiagonalNxN(I);
+
+    Matrix tmp = copyMatrix(A);
+    jordan(tmp.Matrix, I.Matrix, sizeRow);
+
+
+    return I;
+}
 
 Matrix multiplyMatrix(Matrix &M, Matrix &X){
     int MsizeRow = M.sizeRow;
@@ -279,27 +321,19 @@ Result GaussS(Matrix &A, Matrix &b, double eps){
     Matrix U = UMatrix(A);
 //    Matrix DL = addMatrixNxN(D, L, -1);
     Matrix DL = addMatrixNxN(D, L, mConst::ODEJMOWANIE);
-    long long ms3 = std::chrono::duration_cast< std::chrono::milliseconds >(
-            std::chrono::system_clock::now().time_since_epoch()).count();
-    long long dms1ms3 = ms3-ms;
-    Matrix iDL = inverseMatrix(DL);
-    long long ms4 = std::chrono::duration_cast< std::chrono::milliseconds >(
-            std::chrono::system_clock::now().time_since_epoch()).count();
-    long long dms3ms4 = ms4-ms3;
+//    long long ms3 = std::chrono::duration_cast< std::chrono::milliseconds >(
+//            std::chrono::system_clock::now().time_since_epoch()).count();
+//    long long dms1ms3 = ms3-ms;
+//    Matrix iDL = inverseMatrix(DL);
+    Matrix iDL = inverseMatrixTT(DL);
+//    long long ms4 = std::chrono::duration_cast< std::chrono::milliseconds >(
+//            std::chrono::system_clock::now().time_since_epoch()).count();long long dms3ms4 = ms4-ms3;
     Matrix T = multiplyMatrix(iDL, U);
     Matrix F = multiplyMatrix(iDL, b);
-    long long ms5 = std::chrono::duration_cast< std::chrono::milliseconds >(
-            std::chrono::system_clock::now().time_since_epoch()).count();
-    long long dms4ms5 = ms5-ms4;
-//    displayMatrix(A);
-//    displayMatrix(b);
-//    displayMatrix(D);
-//    displayMatrix(L);
-//    displayMatrix(U);
-//    displayMatrix(DL);
-//    displayMatrix(iDL);
-//    displayMatrix(T);
-//    displayMatrix(F);
+//    long long ms5 = std::chrono::duration_cast< std::chrono::milliseconds >(
+//            std::chrono::system_clock::now().time_since_epoch()).count();
+//    long long dms4ms5 = ms5-ms4;
+
 
     Matrix Xout;
     Matrix TX;
@@ -334,14 +368,15 @@ Result Jacobi(Matrix &A, Matrix &b, double eps) {
     Matrix D = DMatrix(A);
     Matrix L = LMatrix(A);
     Matrix U = UMatrix(A);
-    long long ms3 = std::chrono::duration_cast< std::chrono::milliseconds >(
-            std::chrono::system_clock::now().time_since_epoch()).count();
-    long long dms1ms3 = ms3-ms;
+//    long long ms3 = std::chrono::duration_cast< std::chrono::milliseconds >(
+//            std::chrono::system_clock::now().time_since_epoch()).count();
+//    long long dms1ms3 = ms3-ms;
     Matrix LU = addMatrixNxN(L, U);
-    Matrix iD = inverseMatrix(D);
-    long long ms4 = std::chrono::duration_cast< std::chrono::milliseconds >(
-            std::chrono::system_clock::now().time_since_epoch()).count();
-    long long dms4ms3 = ms4-ms3;
+//    Matrix iD = inverseMatrix(D);
+    Matrix iD = inverseMatrixTT(D);
+//    long long ms4 = std::chrono::duration_cast< std::chrono::milliseconds >(
+//            std::chrono::system_clock::now().time_since_epoch()).count();
+//    long long dms4ms3 = ms4-ms3;
     Matrix T = multiplyMatrix(iD, LU);
     Matrix F = multiplyMatrix(iD, b);
 
@@ -360,12 +395,13 @@ Result Jacobi(Matrix &A, Matrix &b, double eps) {
         Xin = Xout;
         nor = norm(XoutXin);
 //        std::cout << iterationCount<< " | "<< nor <<"\n";
-    } while (eps < nor && iterationCount < 1000);
+
+    } while (eps < nor /*& iterationCount < 300*/);
     long long ms2 = std::chrono::duration_cast< std::chrono::milliseconds >(
             std::chrono::system_clock::now().time_since_epoch()).count();
     Result result;
     result.duration = ms2 - ms;
-    std::cout << ms2 <<'\n'<< ms<<'\n';
+//    std::cout << ms2 <<'\n'<< ms<<'\n';
     result.M = Xout;
     result.iteration = iterationCount;
     result.norm = nor;
@@ -386,7 +422,7 @@ Result Gaussa(Matrix &A, Matrix &B){
     for (int row = 0; row < sizeRow; ++row) {
         a = tmp.Matrix[row][row];
         iteration +=1;
-        std::cout << iteration <<"\n";
+//        std::cout << iteration <<"\n";
         for (int col = row; col < sizeCol; ++col) {
             if(a== 0){
                 break;
@@ -447,9 +483,6 @@ int main() {
 
 //    testowe mniejsze rozmiary by było widać co sie dzieje przy debugowaniu
 
-    Matrix A = createMyMatrixNxN(mConst::tmpsize, (double) 5 + mConst::e, (double) -1, (double) -1);
-
-    Matrix b = createMyVectorN(mConst::tmpsize, (double) mConst::f);
 
 //    displayMatrix(A);
 //    displayMatrix(b);
@@ -562,44 +595,75 @@ int main() {
             std::chrono::system_clock::now().time_since_epoch()).count();
     std::cout << ms;
 */
-
-    Result R = Jacobi(A, b, mConst::eps);
+//    Matrix A = createMyMatrixNxN(mConst::tmpsize, (double) 5 + mConst::e, (double) -1, (double) -1);
+//
+//    Matrix b = createMyVectorN(mConst::tmpsize, (double) mConst::f);
+//
+//    Result R = Jacobi(A, b, mConst::eps);
 //    std::cout<<"----------------------------------------------------" <<std::endl;
-    std::cout<<R.iteration<<"\n"<<R.duration<<"\n";
-    displayMatrix(R.M);
-    Result R2 = GaussS(A, b, mConst::eps);
-    std::cout<<"----------------------------------------------------" <<std::endl;
-    std::cout << R2.iteration << "\n" << R2.duration << "\n";
-    displayMatrix(R2.M);
+//    std::cout<< "iteration " << R.iteration<<"\n"<< "czas " <<R.duration<<"\n";
+////    displayMatrix(R.M);
+//    Result R2 = GaussS(A, b, mConst::eps);
+//    std::cout<<"----------------------------------------------------" <<std::endl;
+//    std::cout << "iteration " << R2.iteration << "\n" << "czas " << R2.duration << "\n";
+////    displayMatrix(R2.M);
 //    Result R3 = Gaussa(A, b);
 //    std::cout<<"----------------------------------------------------" <<std::endl;
-//    std::cout << R3.iteration << "\n" << R3.duration << "\n";
+//    std::cout << "iteration " << R3.iteration << "\n" << "czas " << R3.duration << "\n";
+
+    int tmpsizetab[] = {100, 300, 500, mConst::N, 1000, 2000, 3000, 5000, 10000};
+    for (int i = 0; i <8; ++i) {
+        int tmpsize = tmpsizetab[i];
+        Matrix AA = createMyMatrixNxN(tmpsize, (double) 5 + mConst::e, (double) -1, (double) -1);
+        Matrix bb = createMyVectorN(tmpsize, (double) mConst::f);
+
+//        Matrix AA = createMyMatrixNxN(tmpsize, (double) 3, (double) -1, (double) -1);
+//        Matrix bb = createMyVectorN(tmpsize, (double) mConst::f);
+
+//        std::cout<<"-------------------------------------------------------------------------------------------------" <<std::endl;
+//        std::cout<<tmpsizetab[i] <<std::endl;
+//        Result RR = Jacobi(AA, bb, mConst::eps);
+//        std::cout<<"----------------------------------------------------" <<std::endl;
+//        std::cout<< "Jacobi" <<std::endl;
+//        std::cout<< "iteration " << RR.iteration<<"\n"<< "czas " <<RR.duration<<"\n";
+//    displayMatrix(RR.M);
+//        Result RR2 = GaussS(AA, bb, mConst::eps);
+//        std::cout<<"----------------------------------------------------" <<std::endl;
+//        std::cout<< "Gauss-S" <<std::endl;
+//        std::cout << "iteration " << RR2.iteration << "\n" << "czas " << RR2.duration << "\n";
+//    displayMatrix(RR2.M);
+        Result RR3 = Gaussa(AA, bb);
+        std::cout << "----------------------------------------------------" << std::endl;
+        std::cout << "Gauss" << std::endl;
+        std::cout << "Residium " << RR3.norm << "\n" << "czas " << RR3.duration << "\n";
+//        displayMatrix(RR3.M);
+    }
 //    displayMatrix(R3.M);
 //    ----------KONIEC TESTÓW--------------------Matrix AA = createMatrix(4, 4);
-    Matrix BB = createMatrix(4, 1);
-    BB.Matrix[0][0] = 13.15;
-    BB.Matrix[1][0] = 49.84;
-    BB.Matrix[2][0] = -14.08;
-    BB.Matrix[3][0] = -46.51;
-    Matrix AA = createMatrix(4,4);
-    double g4[4][4] = {1.2, 2.6, -0.1, 1.5,
-                       4.5, 9.8, -0.4, 5.7,
-                       0.1, -0.1, -0.3, -3.5,
-                       4.5, -5.2, 4.2, -3.4};
-
-    double ** y4 = 0;
-    y4 = new double*[4];
-    for (int h = 0; h < 4; h++)
-    {
-        y4[h] = new double[4];
-        for (int w = 0; w < 4; ++w) {
-            y4[h][w] = g4[h][w];
-        }
-    }
-    AA.Matrix = y4;
-    Result R4 = Gaussa(AA, BB);
-    std::cout<<"----------------------------------------------------" <<std::endl;
-    std::cout << R4.iteration << "\n" << R4.duration << "\n";
-    displayMatrix(R4.M);
+//    Matrix BB = createMatrix(4, 1);
+//    BB.Matrix[0][0] = 13.15;
+//    BB.Matrix[1][0] = 49.84;
+//    BB.Matrix[2][0] = -14.08;
+//    BB.Matrix[3][0] = -46.51;
+//    Matrix AA = createMatrix(4,4);
+//    double g4[4][4] = {1.2, 2.6, -0.1, 1.5,
+//                       4.5, 9.8, -0.4, 5.7,
+//                       0.1, -0.1, -0.3, -3.5,
+//                       4.5, -5.2, 4.2, -3.4};
+//
+//    double ** y4 = 0;
+//    y4 = new double*[4];
+//    for (int h = 0; h < 4; h++)
+//    {
+//        y4[h] = new double[4];
+//        for (int w = 0; w < 4; ++w) {
+//            y4[h][w] = g4[h][w];
+//        }
+//    }
+//    AA.Matrix = y4;
+//    Result R4 = Gaussa(AA, BB);
+//    std::cout<<"----------------------------------------------------" <<std::endl;
+//    std::cout << R4.iteration << "\n" << R4.duration << "\n";
+//    displayMatrix(R4.M);
     return 0;
 }
